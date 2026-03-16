@@ -1,0 +1,57 @@
+{
+  "name": "job-ranger",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Job search and monitoring application",
+  "author": "Job Ranger Team",
+  "license": "MIT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "desktop:compile": "tsc -p tsconfig.electron.json",
+    "desktop:watch": "tsc -p tsconfig.electron.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "npm run desktop:compile && node backend-smoke-test.cjs",
+    "repo:health": "npm run typecheck && npm run build && npm run test",
+    "electron:dev": "concurrently \"npm run dev\" \"npm run desktop:watch\" \"wait-on http://localhost:5173 electron/main.cjs && electron .\"",
+    "electron:build": "npm run repo:health && electron-builder",
+    "electron:build:win": "npm run repo:health && electron-builder --win",
+    "electron:pack": "npm run repo:health && electron-builder --dir"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.577.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-router-dom": "^7.13.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@electron/notarize": "^2.2.1",
+    "@tailwindcss/vite": "4.1.17",
+    "@types/electron": "^1.4.38",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
+    "concurrently": "^8.2.2",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3",
+    "vite": "7.2.4",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "extends": "electron-builder.json"
+  }
+}
+
+
