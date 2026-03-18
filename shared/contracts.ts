@@ -258,6 +258,13 @@ export interface Settings {
   maxConcurrentScrapes: number;
   scrapeTimeoutMs: number;
   retryCount: number;
+  scrapeCooldownMinutes: number;
+  circuitBreakerThreshold: number;
+  circuitBreakerCooldownMinutes: number;
+  notificationsEnabled: boolean;
+  notifyOnNewJobs: boolean;
+  notifyOnMatchedJobs: boolean;
+  minimizeToTray: boolean;
 }
 
 export type SettingsUpdate = Partial<Settings>;

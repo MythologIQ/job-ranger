@@ -21,129 +21,12 @@ export type SourceSupportLevel =
   | "browser-required"
   | "manual-review";
 
-export interface SourceProfile {
-  type: CompanySourceType;
-  label: string;
-  extractionMode: SourceExtractionMode;
-  supportLevel: SourceSupportLevel;
-  canRun: boolean;
-  summary: string;
-}
-
-export const sourceProfiles: Record<CompanySourceType, SourceProfile> = {
-  greenhouse: {
-    type: "greenhouse",
-    label: "Greenhouse",
-    extractionMode: "api",
-    supportLevel: "supported",
-    canRun: true,
-    summary: "Structured board API adapter.",
-  },
-  lever: {
-    type: "lever",
-    label: "Lever",
-    extractionMode: "api",
-    supportLevel: "supported",
-    canRun: true,
-    summary: "Structured posting API adapter.",
-  },
-  workday: {
-    type: "workday",
-    label: "Workday",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected Workday portal using generic extraction with browser fallback.",
-  },
-  icims: {
-    type: "icims",
-    label: "iCIMS",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected iCIMS portal using generic extraction with browser fallback.",
-  },
-  smartrecruiters: {
-    type: "smartrecruiters",
-    label: "SmartRecruiters",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected SmartRecruiters portal using generic extraction with browser fallback.",
-  },
-  ashby: {
-    type: "ashby",
-    label: "Ashby",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected Ashby board using generic extraction with browser fallback.",
-  },
-  bamboohr: {
-    type: "bamboohr",
-    label: "BambooHR",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected BambooHR board using generic extraction with browser fallback.",
-  },
-  taleo: {
-    type: "taleo",
-    label: "Taleo",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected Taleo or Oracle Recruiting page using generic extraction with browser fallback.",
-  },
-  oracle: {
-    type: "oracle",
-    label: "Oracle Careers",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected Oracle careers page using generic extraction with browser fallback.",
-  },
-  microsoft: {
-    type: "microsoft",
-    label: "Microsoft Careers",
-    extractionMode: "browser",
-    supportLevel: "browser-required",
-    canRun: true,
-    summary: "Detected Microsoft Careers using browser-backed extraction.",
-  },
-  "generic-html": {
-    type: "generic-html",
-    label: "Generic careers page",
-    extractionMode: "html",
-    supportLevel: "detected",
-    canRun: true,
-    summary: "Detected a likely careers page using generic extraction with browser fallback.",
-  },
-  "browser-required": {
-    type: "browser-required",
-    label: "Browser-backed portal",
-    extractionMode: "browser",
-    supportLevel: "browser-required",
-    canRun: true,
-    summary: "Detected a portal that runs through the hidden browser extractor.",
-  },
-  unsupported: {
-    type: "unsupported",
-    label: "Unknown source",
-    extractionMode: "unknown",
-    supportLevel: "manual-review",
-    canRun: false,
-    summary: "No reliable extraction path has been detected yet.",
-  },
-};
-
-export function getSourceProfile(type: CompanySourceType): SourceProfile {
-  return sourceProfiles[type] ?? sourceProfiles.unsupported;
-}
-
-export function canRunSourceType(type: CompanySourceType): boolean {
-  return getSourceProfile(type).canRun;
-}
+export {
+  type SourceProfile,
+  sourceProfiles,
+  getSourceProfile,
+  canRunSourceType,
+} from "./source-profiles.cjs";
 
 export type CompanyRunStatus =
   | "idle"
@@ -158,7 +41,8 @@ export type ScrapeRunStatus =
   | "success"
   | "failure"
   | "partial"
-  | "unsupported";
+  | "unsupported"
+  | "skipped";
 
 export interface Company {
   id: string;
@@ -171,6 +55,8 @@ export interface Company {
   lastRunAt: string | null;
   lastRunStatus: CompanyRunStatus;
   lastErrorMessage: string | null;
+  consecutiveFailures: number;
+  circuitOpenUntil: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -258,6 +144,13 @@ export interface Settings {
   maxConcurrentScrapes: number;
   scrapeTimeoutMs: number;
   retryCount: number;
+  scrapeCooldownMinutes: number;
+  circuitBreakerThreshold: number;
+  circuitBreakerCooldownMinutes: number;
+  notificationsEnabled: boolean;
+  notifyOnNewJobs: boolean;
+  notifyOnMatchedJobs: boolean;
+  minimizeToTray: boolean;
 }
 
 export type SettingsUpdate = Partial<Settings>;
@@ -268,6 +161,22 @@ export interface SystemStatus {
   databasePath: string;
   sqliteBinaryPath: string;
   supportedSources: CompanySourceType[];
+}
+
+export interface BrowserLoadOptions {
+  url: string;
+  waitSelectors: string[];
+  maxWaitMs: number;
+  enableScroll: boolean;
+  maxScrollIterations: number;
+}
+
+export interface PlatformSelectors {
+  waitFor: string[];
+  jobCard: string;
+  title: string;
+  location: string;
+  link: string;
 }
 
 export interface DesktopApi {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Database, Save, Settings2, SwatchBook } from "lucide-react";
+import { Bell, Database, Save, Settings2, SwatchBook } from "lucide-react";
 import { Layout } from "../components/Layout";
 import { useAppContext } from "../context/AppContext";
 import { useTheme } from "../theme/ThemeProvider";
@@ -10,6 +10,13 @@ const fallbackSettings: RuntimeSettings = {
   maxConcurrentScrapes: 2,
   scrapeTimeoutMs: 20000,
   retryCount: 1,
+  scrapeCooldownMinutes: 30,
+  circuitBreakerThreshold: 3,
+  circuitBreakerCooldownMinutes: 60,
+  notificationsEnabled: false,
+  notifyOnNewJobs: true,
+  notifyOnMatchedJobs: true,
+  minimizeToTray: false,
 };
 
 export function Settings() {
@@ -148,6 +155,62 @@ export function Settings() {
               </button>
             </div>
           </form>
+        </section>
+
+        <section className="grid grid-cols-1 gap-8 xl:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-[var(--color-primary)]" />
+              <h2 className="text-2xl font-semibold">Notifications</h2>
+            </div>
+            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+              Control when Job Ranger alerts you about new opportunities.
+            </p>
+          </div>
+          <div className="panel panel-strong p-6 space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.notificationsEnabled}
+                onChange={(e) => setForm((f) => ({ ...f, notificationsEnabled: e.target.checked }))}
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+              />
+              <span className="text-sm">Enable desktop notifications</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.notifyOnNewJobs}
+                disabled={!form.notificationsEnabled}
+                onChange={(e) => setForm((f) => ({ ...f, notifyOnNewJobs: e.target.checked }))}
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)] disabled:opacity-50"
+              />
+              <span className={`text-sm ${!form.notificationsEnabled ? "opacity-50" : ""}`}>
+                Notify when new jobs are found
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.notifyOnMatchedJobs}
+                disabled={!form.notificationsEnabled}
+                onChange={(e) => setForm((f) => ({ ...f, notifyOnMatchedJobs: e.target.checked }))}
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)] disabled:opacity-50"
+              />
+              <span className={`text-sm ${!form.notificationsEnabled ? "opacity-50" : ""}`}>
+                Notify when jobs match filters
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.minimizeToTray}
+                onChange={(e) => setForm((f) => ({ ...f, minimizeToTray: e.target.checked }))}
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+              />
+              <span className="text-sm">Minimize to system tray on close</span>
+            </label>
+          </div>
         </section>
 
         <section className="grid grid-cols-1 gap-8 xl:grid-cols-[0.9fr_1.1fr]">

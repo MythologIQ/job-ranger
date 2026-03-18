@@ -26,12 +26,24 @@ import {
   type ScrapedJob,
 } from "./scrapers.cjs";
 import { resolveSqliteBinary, sql, SqliteClient } from "./sqlite.cjs";
+import {
+  checkScrapeGuard,
+  shouldOpenCircuit,
+  calculateCircuitOpenUntil,
+} from "./scrape-guard.cjs";
 
 const defaultSettings: Settings = {
   userAgent: "Job Ranger Desktop/1.0",
   maxConcurrentScrapes: 2,
   scrapeTimeoutMs: 20000,
   retryCount: 1,
+  scrapeCooldownMinutes: 30,
+  circuitBreakerThreshold: 3,
+  circuitBreakerCooldownMinutes: 60,
+  notificationsEnabled: false,
+  notifyOnNewJobs: true,
+  notifyOnMatchedJobs: true,
+  minimizeToTray: false,
 };
 
 function normalizeList(items: string[]): string[] {
@@ -427,6 +439,15 @@ export class JobScoutBackend {
     const run = await this.repository.createScrapeRun(companyId);
     const startedAt = new Date().toISOString();
     const profile = getSourceProfile(company.sourceType);
+    const settings = await this.getSettings();
+
+    const guard = checkScrapeGuard(company, settings);
+    if (!guard.canScrape) {
+      const message = guard.reason === "cooldown"
+        ? `Scrape skipped: cooldown until ${guard.waitUntil}`
+        : `Scrape skipped: circuit open until ${guard.waitUntil}`;
+      return this.repository.finalizeScrapeRun(run.id, "skipped", 0, 0, message);
+    }
 
     if (!company.sourceIdentifier) {
       const message = "No source identifier could be derived from this URL.";
@@ -447,7 +468,6 @@ export class JobScoutBackend {
     }
 
     try {
-      const settings = await this.getSettings();
       const adapter = scraperAdapters[company.sourceType as keyof typeof scraperAdapters];
       if (!adapter) {
         throw new Error(`${profile.label} does not have a configured scraper adapter.`);
@@ -506,6 +526,7 @@ export class JobScoutBackend {
         scrapedJobs.map((job: ScrapedJob) => job.sourceJobId),
       );
 
+      await this.repository.resetFailures(company.id);
       await this.repository.setCompanyRunState(company.id, "success", startedAt, null);
       return this.repository.finalizeScrapeRun(
         run.id,
@@ -517,6 +538,12 @@ export class JobScoutBackend {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown scrape failure";
+      await this.repository.incrementFailures(company.id);
+      const updated = await this.repository.getCompanyById(company.id);
+      if (updated && shouldOpenCircuit(updated.consecutiveFailures, settings.circuitBreakerThreshold)) {
+        const openUntil = calculateCircuitOpenUntil(settings.circuitBreakerCooldownMinutes);
+        await this.repository.openCircuit(company.id, openUntil);
+      }
       await this.repository.setCompanyRunState(company.id, "failure", startedAt, message);
       return this.repository.finalizeScrapeRun(run.id, "failure", 0, 0, message);
     }
