@@ -13,6 +13,21 @@ import { Layout } from "../components/Layout";
 import { useAppContext } from "../context/AppContext";
 import { canRunSourceType, getSourceProfile } from "../types";
 
+function formatSourceCoverageMessage(
+  browserRequired: number,
+  manualReview: number,
+): string {
+  if (browserRequired > 0) {
+    const plural = browserRequired === 1 ? " still needs" : "s still need";
+    return `${browserRequired} source${plural} browser-backed automation.`;
+  }
+  if (manualReview > 0) {
+    const plural = manualReview === 1 ? " needs" : "s need";
+    return `${manualReview} source${plural} a dedicated adapter or manual review path.`;
+  }
+  return "Everything in your source list currently has a runnable extraction path.";
+}
+
 export function Dashboard() {
   const { companies, jobs, scrapeRuns, systemStatus, loading, error } = useAppContext();
 
@@ -45,11 +60,7 @@ export function Dashboard() {
       copy:
         companies.length === 0
           ? "Job Ranger can now detect broader ATS families and generic careers pages. Start with the sources you actually care about."
-          : browserRequiredCompanies > 0
-            ? `${browserRequiredCompanies} source${browserRequiredCompanies === 1 ? " still needs" : "s still need"} browser-backed automation.`
-            : manualReviewCompanies > 0
-              ? `${manualReviewCompanies} source${manualReviewCompanies === 1 ? " needs" : "s need"} a dedicated adapter or manual review path.`
-              : "Everything in your source list currently has a runnable extraction path.",
+          : formatSourceCoverageMessage(browserRequiredCompanies, manualReviewCompanies),
     },
     {
       kicker: "Signal quality",

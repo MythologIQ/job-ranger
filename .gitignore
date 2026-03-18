@@ -53,3 +53,4 @@ coverage
 release-*
 electron/
 
+.failsafe/

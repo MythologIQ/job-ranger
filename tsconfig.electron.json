@@ -28,6 +28,14 @@
     "migrations.cts",
     "sqlite.cts",
     "scrapers.cts",
+    "salary-parser.cts",
+    "scrape-guard.cts",
+    "extractors.cts",
+    "browser-loader.cts",
+    "platform-selectors.cts",
+    "source-profiles.cts",
+    "validators.cts",
+    "adapters/**/*.cts",
     "shared/**/*"
   ],
   "exclude": ["node_modules", "dist", "src", "electron", "desktop", "desktopsrc"]

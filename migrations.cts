@@ -92,4 +92,12 @@ export const migrations: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_scrape_runs_started_at ON scrape_runs(started_at DESC);
     `,
   },
+  {
+    version: 2,
+    name: "circuit_breaker",
+    sql: `
+      ALTER TABLE companies ADD COLUMN consecutive_failures INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE companies ADD COLUMN circuit_open_until TEXT;
+    `,
+  },
 ];

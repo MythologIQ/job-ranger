@@ -33,8 +33,14 @@ export function Modal({
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
   if (!open) return null;
-  const widthClass =
-    size === "sm" ? "max-w-md" : size === "lg" ? "max-w-2xl" : "max-w-lg";
+
+  const SIZE_CLASSES = {
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+  } as const;
+
+  const widthClass = SIZE_CLASSES[size];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div

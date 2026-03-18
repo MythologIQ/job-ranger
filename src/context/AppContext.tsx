@@ -22,6 +22,8 @@ import type {
   Toast,
 } from "../types";
 import { getDesktopApi } from "../services/api";
+import { createCompanyActions } from "./useCompanyActions";
+import { createFilterActions } from "./useFilterActions";
 
 interface AppState {
   companies: Company[];
@@ -48,7 +50,6 @@ interface AppState {
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
-
 const autoDismissMs = 5000;
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -68,7 +69,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       ...toast,
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     };
-
     setToasts((current) => [nextToast, ...current].slice(0, 5));
     window.setTimeout(() => {
       setToasts((current) => current.filter((item) => item.id !== nextToast.id));
@@ -85,21 +85,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setError(null);
 
     try {
-      const [
-        nextCompanies,
-        nextJobs,
-        nextFilters,
-        nextSettings,
-        nextRuns,
-        nextSystemStatus,
-      ] = await Promise.all([
-        api.companies.list(),
-        api.jobs.list(),
-        api.filters.list(),
-        api.settings.get(),
-        api.scrapeRuns.listRecent(12),
-        api.system.getStatus(),
-      ]);
+      const [nextCompanies, nextJobs, nextFilters, nextSettings, nextRuns, nextSystemStatus] =
+        await Promise.all([
+          api.companies.list(),
+          api.jobs.list(),
+          api.filters.list(),
+          api.settings.get(),
+          api.scrapeRuns.listRecent(12),
+          api.system.getStatus(),
+        ]);
 
       startTransition(() => {
         setCompanies(nextCompanies);
@@ -111,9 +105,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
     } catch (refreshError) {
       const message =
-        refreshError instanceof Error
-          ? refreshError.message
-          : "Failed to load Job Ranger data.";
+        refreshError instanceof Error ? refreshError.message : "Failed to load Job Ranger data.";
       setError(message);
     } finally {
       setLoading(false);
@@ -123,37 +115,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     void refresh();
-
-    const intervalId = window.setInterval(() => {
-      void refresh();
-    }, 30000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
+    const intervalId = window.setInterval(() => void refresh(), 30000);
+    return () => window.clearInterval(intervalId);
   }, []);
 
-  const withFeedback = async (
-    action: () => Promise<void>,
-    successToast: Omit<Toast, "id">,
-  ) => {
-    setError(null);
-
-    try {
-      await action();
-      addToast(successToast);
-    } catch (actionError) {
-      const message =
-        actionError instanceof Error ? actionError.message : "Action failed.";
-      setError(message);
-      addToast({
-        title: "Action failed",
-        message,
-        type: "error",
-      });
-      throw actionError;
-    }
-  };
+  const companyActions = createCompanyActions(refresh, addToast, setError);
+  const filterActions = createFilterActions(refresh, addToast, setError);
 
   const value = useMemo<AppState>(
     () => ({
@@ -168,157 +135,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       refreshing,
       error,
       refresh,
-      addCompany: async (draft) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().companies.create(draft);
-            await refresh();
-          },
-          {
-            title: "Company saved",
-            message: "Job Ranger is now tracking the new source locally.",
-            type: "success",
-          },
-        );
-      },
-      updateCompany: async (id, update) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().companies.update(id, update);
-            await refresh();
-          },
-          {
-            title: "Company updated",
-            message: "The source configuration was updated.",
-            type: "success",
-          },
-        );
-      },
-      deleteCompany: async (id) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().companies.delete(id);
-            await refresh();
-          },
-          {
-            title: "Company removed",
-            message: "Associated jobs and scrape history were removed.",
-            type: "success",
-          },
-        );
-      },
-      runScraper: async (companyId) => {
-        setError(null);
-
-        try {
-          const run = await getDesktopApi().companies.runScrape(companyId);
-          await refresh();
-
-          if (run.status === "success") {
-            addToast({
-              title: "Scrape finished",
-              message: "Latest jobs and run history have been refreshed.",
-              type: "success",
-            });
-            return;
-          }
-
-          if (run.status === "unsupported") {
-            addToast({
-              title: "Source unsupported",
-              message:
-                run.errorMessage ??
-                "This source needs a different extraction path or a dedicated adapter.",
-              type: "info",
-            });
-            return;
-          }
-
-          const failureMessage =
-            run.errorMessage ?? "The scrape did not complete successfully.";
-          setError(failureMessage);
-          addToast({
-            title: "Scrape failed",
-            message: failureMessage,
-            type: "error",
-          });
-        } catch (actionError) {
-          const message =
-            actionError instanceof Error ? actionError.message : "Action failed.";
-          setError(message);
-          addToast({
-            title: "Action failed",
-            message,
-            type: "error",
-          });
-          throw actionError;
-        }
-      },
-      addFilter: async (draft) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().filters.create(draft);
-            await refresh();
-          },
-          {
-            title: "Filter saved",
-            message: "The rule will be applied on future supported scrapes.",
-            type: "success",
-          },
-        );
-      },
-      updateFilter: async (id, update) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().filters.update(id, update);
-            await refresh();
-          },
-          {
-            title: "Filter updated",
-            message: "The rule changes were saved locally.",
-            type: "success",
-          },
-        );
-      },
-      deleteFilter: async (id) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().filters.delete(id);
-            await refresh();
-          },
-          {
-            title: "Filter removed",
-            message: "The local matching rule was deleted.",
-            type: "success",
-          },
-        );
-      },
+      ...companyActions,
+      ...filterActions,
       updateSettings: async (update) => {
-        await withFeedback(
-          async () => {
-            const nextSettings = await getDesktopApi().settings.update(update);
-            setSettings(nextSettings);
-            await refresh();
-          },
-          {
+        setError(null);
+        try {
+          const nextSettings = await getDesktopApi().settings.update(update);
+          setSettings(nextSettings);
+          await refresh();
+          addToast({
             title: "Settings saved",
             message: "Desktop runtime settings were persisted locally.",
             type: "success",
-          },
-        );
+          });
+        } catch (actionError) {
+          const message = actionError instanceof Error ? actionError.message : "Action failed.";
+          setError(message);
+          addToast({ title: "Action failed", message, type: "error" });
+          throw actionError;
+        }
       },
       markJobAsSeen: async (id) => {
-        await withFeedback(
-          async () => {
-            await getDesktopApi().jobs.markSeen(id);
-            await refresh();
-          },
-          {
+        setError(null);
+        try {
+          await getDesktopApi().jobs.markSeen(id);
+          await refresh();
+          addToast({
             title: "Job updated",
             message: "The job is no longer marked as new.",
             type: "info",
-          },
-        );
+          });
+        } catch (actionError) {
+          const message = actionError instanceof Error ? actionError.message : "Action failed.";
+          setError(message);
+          addToast({ title: "Action failed", message, type: "error" });
+          throw actionError;
+        }
       },
       removeToast,
     }),
@@ -335,6 +187,3 @@ export const useAppContext = () => {
   }
   return context;
 };
-
-
-

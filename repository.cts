@@ -25,6 +25,8 @@ type CompanyRow = {
   last_run_at: string | null;
   last_run_status: CompanyRunStatus;
   last_error_message: string | null;
+  consecutive_failures: number;
+  circuit_open_until: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -106,6 +108,8 @@ function mapCompany(row: CompanyRow): Company {
     lastRunAt: row.last_run_at,
     lastRunStatus: row.last_run_status,
     lastErrorMessage: row.last_error_message,
+    consecutiveFailures: row.consecutive_failures ?? 0,
+    circuitOpenUntil: row.circuit_open_until ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -280,6 +284,30 @@ export class JobScoutRepository {
 
   async deleteCompany(id: string): Promise<void> {
     await this.sqlite.exec(sql`DELETE FROM companies WHERE id = ${id};`);
+  }
+
+  async incrementFailures(companyId: string): Promise<void> {
+    await this.sqlite.exec(sql`
+      UPDATE companies
+      SET consecutive_failures = consecutive_failures + 1
+      WHERE id = ${companyId};
+    `);
+  }
+
+  async resetFailures(companyId: string): Promise<void> {
+    await this.sqlite.exec(sql`
+      UPDATE companies
+      SET consecutive_failures = 0, circuit_open_until = NULL
+      WHERE id = ${companyId};
+    `);
+  }
+
+  async openCircuit(companyId: string, until: string): Promise<void> {
+    await this.sqlite.exec(sql`
+      UPDATE companies
+      SET circuit_open_until = ${until}
+      WHERE id = ${companyId};
+    `);
   }
 
   async listJobs(): Promise<Job[]> {

@@ -1,24 +1,24 @@
 import { useMemo, useState } from "react";
 import { AlertCircle, Building2, Compass, Plus, Play, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { CompanyForm } from "../components/CompanyForm";
 import { Layout } from "../components/Layout";
 import { Modal } from "../components/Modal";
 import { useAppContext } from "../context/AppContext";
 import { getDesktopApi } from "../services/api";
 import { canRunSourceType, getSourceProfile } from "../types";
 
-const defaultForm = {
-  name: "",
-  url: "",
-  frequencyMinutes: 1440,
-  isActive: true,
+const SUPPORT_BADGE_CLASSES: Record<string, string> = {
+  supported: "soft-badge-success",
+  detected: "soft-badge-info",
+  "browser-required": "soft-badge-warning",
+  "manual-review": "soft-badge-danger",
 };
 
 export function Companies() {
   const { companies, addCompany, deleteCompany, runScraper, refreshing } = useAppContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [runningId, setRunningId] = useState<string | null>(null);
-  const [formData, setFormData] = useState(defaultForm);
 
   const runnableCount = useMemo(
     () => companies.filter((company) => canRunSourceType(company.sourceType)).length,
@@ -28,13 +28,6 @@ export function Companies() {
     () => companies.filter((company) => company.sourceType === "browser-required").length,
     [companies],
   );
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    await addCompany(formData);
-    setFormData(defaultForm);
-    setModalOpen(false);
-  };
 
   const handleRun = async (companyId: string) => {
     setRunningId(companyId);
@@ -106,14 +99,7 @@ export function Companies() {
             {companies.map((company) => {
               const profile = getSourceProfile(company.sourceType);
               const canRun = canRunSourceType(company.sourceType);
-              const badgeClass =
-                profile.supportLevel === "supported"
-                  ? "soft-badge-success"
-                  : profile.supportLevel === "detected"
-                    ? "soft-badge-info"
-                    : profile.supportLevel === "browser-required"
-                      ? "soft-badge-warning"
-                      : "soft-badge-danger";
+              const badgeClass = SUPPORT_BADGE_CLASSES[profile.supportLevel] ?? "soft-badge-danger";
 
               return (
                 <tr key={company.id}>
@@ -199,79 +185,13 @@ export function Companies() {
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add job source">
-        <form className="space-y-4" onSubmit={(event) => void handleSubmit(event)}>
-          <div>
-            <label htmlFor="company-name" className="block text-sm font-medium">
-              Name
-            </label>
-            <input
-              id="company-name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={(event) =>
-                setFormData((current) => ({ ...current, name: event.target.value }))
-              }
-              className="input-shell mt-1"
-            />
-          </div>
-          <div>
-            <label htmlFor="company-url" className="block text-sm font-medium">
-              Careers or board URL
-            </label>
-            <input
-              id="company-url"
-              type="url"
-              required
-              value={formData.url}
-              onChange={(event) =>
-                setFormData((current) => ({ ...current, url: event.target.value }))
-              }
-              className="input-shell mt-1"
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="frequency" className="block text-sm font-medium">
-                Frequency
-              </label>
-              <select
-                id="frequency"
-                value={formData.frequencyMinutes}
-                onChange={(event) =>
-                  setFormData((current) => ({
-                    ...current,
-                    frequencyMinutes: Number(event.target.value),
-                  }))
-                }
-                className="select-shell mt-1"
-              >
-                <option value={15}>Every 15 minutes</option>
-                <option value={30}>Every 30 minutes</option>
-                <option value={60}>Every hour</option>
-                <option value={1440}>Every 24 hours</option>
-              </select>
-            </div>
-            <label className="panel panel-muted flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
-              <input
-                type="checkbox"
-                checked={formData.isActive}
-                onChange={(event) =>
-                  setFormData((current) => ({ ...current, isActive: event.target.checked }))
-                }
-              />
-              Enable local scheduling
-            </label>
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setModalOpen(false)} className="secondary-button">
-              Cancel
-            </button>
-            <button type="submit" className="primary-button">
-              Save source
-            </button>
-          </div>
-        </form>
+        <CompanyForm
+          onSubmit={async (draft) => {
+            await addCompany(draft);
+            setModalOpen(false);
+          }}
+          onCancel={() => setModalOpen(false)}
+        />
       </Modal>
     </Layout>
   );
