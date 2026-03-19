@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Ranger Help</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f3ef;
+        --panel: rgba(255, 255, 255, 0.88);
+        --panel-strong: rgba(255, 255, 255, 0.96);
+        --text: #1f2937;
+        --text-muted: #5b6472;
+        --accent: #0f766e;
+        --accent-soft: rgba(15, 118, 110, 0.12);
+        --border: rgba(15, 23, 42, 0.12);
+        --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 30%),
+          radial-gradient(circle at top right, rgba(30, 64, 175, 0.1), transparent 26%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px 56px;
+      }
+
+      .hero {
+        padding: 32px;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        background: linear-gradient(135deg, var(--panel-strong), rgba(255, 255, 255, 0.76));
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        line-height: 1.04;
+      }
+
+      .lede {
+        max-width: 760px;
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 18px;
+        margin-top: 22px;
+      }
+
+      .card,
+      section {
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .card {
+        padding: 18px 20px;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      nav {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        padding: 20px;
+      }
+
+      nav h2 {
+        margin: 0 0 12px;
+        font-size: 0.95rem;
+      }
+
+      nav a {
+        display: block;
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+
+      nav a:hover {
+        background: rgba(15, 118, 110, 0.08);
+      }
+
+      .content {
+        display: grid;
+        gap: 20px;
+      }
+
+      section {
+        padding: 24px;
+      }
+
+      section h2 {
+        margin: 0 0 12px;
+        font-size: 1.35rem;
+      }
+
+      p,
+      li {
+        color: var(--text-muted);
+        line-height: 1.7;
+      }
+
+      ul,
+      ol {
+        margin: 12px 0 0;
+        padding-left: 20px;
+      }
+
+      code {
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.06);
+        font-family: "Cascadia Code", "Consolas", monospace;
+        font-size: 0.92em;
+        color: var(--text);
+      }
+
+      .status {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(21, 128, 61, 0.1);
+        color: #166534;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(30, 64, 175, 0.07);
+        color: var(--text);
+      }
+
+      footer {
+        margin-top: 22px;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        nav {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="eyebrow">Job Ranger Help</div>
+        <h1>Private job monitoring, explained clearly.</h1>
+        <p class="lede">
+          Job Ranger helps you monitor selected career pages, review results locally, and tune the desktop runtime without
+          turning your search into a subscription or a cloud workflow.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <strong>Best use case</strong>
+            Track a focused list of companies instead of trawling broad job boards.
+          </div>
+          <div class="card">
+            <strong>Core workflow</strong>
+            Add source, run scrape, review jobs, tighten filters, repeat.
+          </div>
+          <div class="card">
+            <strong>Storage model</strong>
+            Companies, jobs, filters, and settings are stored locally on your machine.
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <nav class="card" aria-label="Help navigation">
+          <h2>Contents</h2>
+          <a href="#start">Getting Started</a>
+          <a href="#sources">Adding Sources</a>
+          <a href="#review">Reviewing Jobs</a>
+          <a href="#filters">Using Filters</a>
+          <a href="#settings">Settings</a>
+          <a href="#notifications">Notifications And Tray</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+
+        <div class="content">
+          <section id="start">
+            <h2>Getting Started</h2>
+            <ol>
+              <li>Open the app and wait for the dashboard to load.</li>
+              <li>Move to <code>Companies</code> and choose <code>Add source</code>.</li>
+              <li>Enter a company name, a careers URL, and a polling frequency.</li>
+              <li>Run the first scrape and review the results in <code>Jobs</code>.</li>
+            </ol>
+            <div class="status">Implemented desktop workflow</div>
+          </section>
+
+          <section id="sources">
+            <h2>Adding Sources</h2>
+            <p>
+              Job Ranger works best when you add explicit company career pages that you actually care about. It classifies
+              source types rather than assuming every site is equally automatable.
+            </p>
+            <ul>
+              <li><strong>Supported:</strong> adapter-backed paths such as Greenhouse, Lever, SmartRecruiters, and Ashby.</li>
+              <li><strong>Detected:</strong> sources such as Workday, iCIMS, BambooHR, Taleo, Oracle Careers, and generic HTML pages.</li>
+              <li><strong>Browser-required:</strong> portals that need a browser-backed extraction path.</li>
+              <li><strong>Unsupported:</strong> pages without a reliable extraction route.</li>
+            </ul>
+            <div class="note">
+              If a source is marked unsupported, the app is being honest. That status is preferable to a false success result.
+            </div>
+          </section>
+
+          <section id="review">
+            <h2>Reviewing Jobs</h2>
+            <p>
+              The <code>Jobs</code> page is the review queue for your locally stored results. Use it to inspect title, location,
+              salary text, and matched filter counts, then mark items seen as you process them.
+            </p>
+          </section>
+
+          <section id="filters">
+            <h2>Using Filters</h2>
+            <p>
+              Filters help reduce noise after the first few scrapes. You can combine title terms, keyword terms, salary minimums,
+              and location rules to make the next pass more useful.
+            </p>
+            <ul>
+              <li>Start narrow rather than encoding every preference up front.</li>
+              <li>Use title include rules for role families.</li>
+              <li>Use keyword exclude rules to remove noisy categories.</li>
+              <li>Adjust based on the match counts you see after a run.</li>
+            </ul>
+          </section>
+
+          <section id="settings">
+            <h2>Settings</h2>
+            <p>The settings screen exposes two kinds of controls.</p>
+            <ul>
+              <li><strong>Runtime behavior:</strong> user agent, timeout, concurrency, retries, and cooldown values.</li>
+              <li><strong>Desktop facts:</strong> database path, SQLite path, and supported adapters.</li>
+            </ul>
+            <p>
+              These are not cosmetic toggles. They directly shape how assertive the local worker is when it scrapes supported sources.
+            </p>
+          </section>
+
+          <section id="notifications">
+            <h2>Notifications And Tray</h2>
+            <p>
+              Job Ranger can be configured to notify on new jobs, matched jobs, and minimize to the tray when the main window is
+              closed. Use the settings page to control this behavior.
+            </p>
+            <p>
+              The application menu also provides an in-app Help entry and a shortcut for opening the local data folder.
+            </p>
+          </section>
+
+          <section id="troubleshooting">
+            <h2>Troubleshooting</h2>
+            <ul>
+              <li>If no jobs appear, confirm that the source URL is a real careers page and the source is active.</li>
+              <li>If a source is unsupported, treat that as a truthful classification rather than a transient bug.</li>
+              <li>If notifications do not appear, verify both the app toggles and your OS notification permissions.</li>
+              <li>If closing the window exits the app, enable minimize-to-tray in settings.</li>
+              <li>If the desktop backend cannot start in a development environment, confirm that <code>sqlite3</code> is available or set <code>SQLITE3_PATH</code>.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+
+      <footer>
+        Need more detail? See the repository README and HELP.md for the full operator and project documentation.
+      </footer>
+    </main>
+  </body>
+</html>
