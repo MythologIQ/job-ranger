@@ -1,4 +1,4 @@
-export * from "../../shared/contracts";
+export * from "../shared/contracts";
 
 export interface Toast {
   id: string;

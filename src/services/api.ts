@@ -1,4 +1,4 @@
-import type { DesktopApi } from "../../shared/contracts";
+import type { DesktopApi } from "../shared/contracts";
 
 export class DesktopApiError extends Error {
   constructor(message: string) {

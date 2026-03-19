@@ -54,3 +54,6 @@ release-*
 electron/
 
 .failsafe/
+.agent/
+.claude/
+.kilocode/

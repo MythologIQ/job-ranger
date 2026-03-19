@@ -1,47 +1,47 @@
-{
-  "appId": "com.jobranger.app",
-  "productName": "Job Ranger",
-  "copyright": "Copyright � 2024 Job Ranger",
-  "directories": {
-    "output": "release",
-    "buildResources": "build"
-  },
-  "files": [
-    "dist/**/*",
-    "package.json",
-    "electron/**/*"
-  ],
-  "extraMetadata": {
-    "main": "electron/main.cjs"
-  },
-  "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      },
-      {
-        "target": "portable",
-        "arch": [
-          "x64"
-        ]
-      }
-    ],
-    "icon": "ICON.png",
-    "artifactName": "${productName}-${version}-${arch}.${ext}"
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "Job Ranger",
-    "uninstallDisplayName": "Job Ranger",
-    "perMachine": false,
-    "allowElevation": false,
-    "deleteAppDataOnUninstall": false,
-    "runAfterFinish": true
-  }
+﻿{
+    "appId":  "com.jobranger.app",
+    "productName":  "Job Ranger",
+    "copyright":  "Copyright © 2026 Job Ranger",
+    "directories":  {
+                        "output":  "release",
+                        "buildResources":  "build"
+                    },
+    "files":  [
+                  "dist/**/*",
+                  "package.json",
+                  "electron/**/*"
+              ],
+    "extraMetadata":  {
+                          "main":  "electron/main.cjs"
+                      },
+    "win":  {
+                "target":  [
+                               {
+                                   "target":  "nsis",
+                                   "arch":  [
+                                                "x64"
+                                            ]
+                               },
+                               {
+                                   "target":  "portable",
+                                   "arch":  [
+                                                "x64"
+                                            ]
+                               }
+                           ],
+                "icon":  "public/ICON.png",
+                "artifactName":  "${productName}-v${version}-${arch}.${ext}"
+            },
+    "nsis":  {
+                 "oneClick":  false,
+                 "allowToChangeInstallationDirectory":  true,
+                 "createDesktopShortcut":  true,
+                 "createStartMenuShortcut":  true,
+                 "shortcutName":  "Job Ranger",
+                 "uninstallDisplayName":  "Job Ranger",
+                 "perMachine":  false,
+                 "allowElevation":  false,
+                 "deleteAppDataOnUninstall":  false,
+                 "runAfterFinish":  true
+             }
 }

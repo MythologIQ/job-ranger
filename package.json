@@ -17,7 +17,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "npm run desktop:compile && node backend-smoke-test.cjs",
+    "test": "npm run desktop:compile && node tests/backend-smoke-test.cjs",
+    "test:unit": "node tests/salary-parser.test.cjs && node tests/scrape-guard.test.cjs && node tests/tray-notifications.test.cjs",
+    "test:e2e": "npm run build && npm run desktop:compile && npx playwright test",
     "repo:health": "npm run typecheck && npm run build && npm run test",
     "electron:dev": "concurrently \"npm run dev\" \"npm run desktop:watch\" \"wait-on http://localhost:5173 electron/main.cjs && electron .\"",
     "electron:build": "npm run repo:health && electron-builder",
@@ -34,7 +36,9 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@electron/fuses": "^1.8.0",
     "@electron/notarize": "^2.2.1",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "4.1.17",
     "@types/electron": "^1.4.38",
     "@types/node": "^22.0.0",
@@ -42,8 +46,9 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
     "concurrently": "^8.2.2",
-    "electron": "^28.0.0",
+    "electron": "^28.3.3",
     "electron-builder": "^24.9.1",
+    "playwright": "^1.58.2",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
     "vite": "7.2.4",
@@ -53,5 +58,3 @@
     "extends": "electron-builder.json"
   }
 }
-
-

@@ -20,23 +20,8 @@
     "types": ["node"]
   },
   "include": [
-    "main.cts",
-    "preload.cts",
-    "backend.cts",
-    "contracts.cts",
-    "repository.cts",
-    "migrations.cts",
-    "sqlite.cts",
-    "scrapers.cts",
-    "salary-parser.cts",
-    "scrape-guard.cts",
-    "extractors.cts",
-    "browser-loader.cts",
-    "platform-selectors.cts",
-    "source-profiles.cts",
-    "validators.cts",
-    "adapters/**/*.cts",
-    "shared/**/*"
+    "electron/src/**/*.cts",
+    "src/shared/**/*"
   ],
-  "exclude": ["node_modules", "dist", "src", "electron", "desktop", "desktopsrc"]
+  "exclude": ["node_modules", "dist", "desktop", "desktopsrc"]
 }
