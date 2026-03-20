@@ -7,6 +7,7 @@ This help file is written for people using or evaluating the desktop application
 ### Install Or Launch
 
 - If you are using a packaged Windows release, run the installer or portable executable.
+- If you are on macOS, do not download the `.exe` release asset. A packaged macOS build is not shipped yet.
 - If you are running from source, start the desktop shell with `npm run electron:dev`.
 
 ### Add Your First Source
@@ -173,7 +174,7 @@ Windows packaging is configured for:
 Artifact names follow:
 
 ```text
-Job Ranger-v<version>-x64.<ext>
+Job Ranger-v<version>-windows-x64.<ext>
 ```
 
 ## Status Snapshot

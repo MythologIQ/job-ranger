@@ -73,12 +73,14 @@ The design center is privacy and operational honesty. The application stores its
 
 ### End Users
 
-Use the Windows release artifacts generated from the project packaging flow. The current packaging configuration produces:
+Use the Windows release artifacts generated from the project packaging flow. The current packaging configuration produces Windows-only downloads:
 
 - An NSIS installer
 - A portable executable
 
-The artifact naming pattern is `Job Ranger-v<version>-x64.<ext>`.
+There is no packaged macOS build in this repository today. If you are on macOS, do not download the `.exe` asset from Releases because it is a Windows binary and will not install correctly.
+
+The artifact naming pattern is `Job Ranger-v<version>-windows-x64.<ext>`.
 
 ### Developers
 
@@ -104,7 +106,7 @@ For development:
 npm run electron:dev
 ```
 
-For a packaged Windows build, use the generated installer or portable executable.
+For a packaged Windows build, use the generated installer or portable executable. macOS packaging is still planned, not shipped.
 
 ### 2. Add A Source
 
@@ -237,7 +239,7 @@ npm run electron:build:win
 npm run electron:pack
 ```
 
-The current builder configuration uses `public/ICON.png` for the Windows icon and names artifacts with the semantic version prefix.
+The current builder configuration uses `public/ICON.png` for the Windows icon and names artifacts with an explicit `windows` platform marker to reduce download confusion on non-Windows devices.
 
 ## Roadmap And Limits
 

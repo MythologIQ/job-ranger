@@ -46,7 +46,7 @@ async function resolveSqliteBinary() {
         return process.env.SQLITE3_PATH;
     }
     const command = process.platform === "win32" ? "where.exe" : "which";
-    const lookupTarget = process.platform === "win32" ? "sqlite3" : "sqlite3";
+    const lookupTarget = "sqlite3";
     try {
         const { stdout } = await execFileAsync(command, [lookupTarget]);
         const [firstMatch] = stdout
@@ -59,8 +59,29 @@ async function resolveSqliteBinary() {
     }
     catch {
     }
+    const fallbackCandidates = process.platform === "darwin"
+        ? [
+            "/usr/bin/sqlite3",
+            "/opt/homebrew/bin/sqlite3",
+            "/usr/local/bin/sqlite3",
+            "/opt/local/bin/sqlite3",
+        ]
+        : process.platform === "linux"
+            ? ["/usr/bin/sqlite3", "/usr/local/bin/sqlite3", "/bin/sqlite3"]
+            : [];
+    for (const candidatePath of fallbackCandidates) {
+        try {
+            await node_fs_1.promises.access(candidatePath, node_fs_1.constants.X_OK);
+            return candidatePath;
+        }
+        catch {
+        }
+    }
     const expectedBinary = process.platform === "win32" ? "sqlite3.exe" : "sqlite3";
-    throw new Error(`${expectedBinary} was not found on PATH. Set SQLITE3_PATH to a valid sqlite3 binary.`);
+    const platformHint = process.platform === "darwin"
+        ? " On macOS, Finder-launched apps may not inherit Homebrew paths, so set SQLITE3_PATH or install sqlite3 in a standard location such as /usr/bin, /opt/homebrew/bin, or /usr/local/bin."
+        : "";
+    throw new Error(`${expectedBinary} was not found. Set SQLITE3_PATH to a valid sqlite3 binary.${platformHint}`);
 }
 class SqliteClient {
     databasePath;
