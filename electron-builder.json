@@ -14,7 +14,7 @@
     "extraMetadata":  {
                           "main":  "electron/main.cjs"
                       },
-    "afterSign":  "scripts/notarize.js",
+    "afterSign":  "scripts/notarize.cjs",
     "win":  {
                 "target":  [
                                {
