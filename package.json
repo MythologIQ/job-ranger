@@ -1,7 +1,7 @@
 {
   "name": "job-ranger",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Job search and monitoring application",
   "author": "Job Ranger Team",
   "license": "MIT",
