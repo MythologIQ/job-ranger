@@ -24,22 +24,61 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == matrix.platform
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            platform: windows
-            build_command: npm run electron:build:win
-            asset_glob: release/Job*windows*.exe,release/Job*windows*.exe.blockmap,release/latest.yml
-          - os: macos-latest
-            platform: macos
-            build_command: npm run electron:build:mac
-            asset_glob: release/Job*macos*.dmg,release/Job*macos*.zip
+  build-windows:
+    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'windows'
+    runs-on: windows-latest
 
-    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build release artifacts
+        run: npm run electron:build:win
+
+      - name: Resolve target tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure GitHub release exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "${{ steps.release_tag.outputs.tag }}" >/dev/null 2>&1; then
+            gh release create "${{ steps.release_tag.outputs.tag }}" \
+              --title "Job Ranger ${{ steps.release_tag.outputs.tag }}" \
+              --generate-notes
+          fi
+
+      - name: Upload release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ steps.release_tag.outputs.tag }}" \
+            release/Job*windows*.exe \
+            release/Job*windows*.exe.blockmap \
+            release/latest.yml \
+            --clobber
+
+  build-macos:
+    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'macos'
+    runs-on: macos-latest
 
     steps:
       - name: Check out repository
@@ -55,7 +94,6 @@ jobs:
         run: npm ci
 
       - name: Generate macOS icon
-        if: matrix.platform == 'macos'
         shell: bash
         run: |
           set -euo pipefail
@@ -73,7 +111,7 @@ jobs:
           iconutil -c icns build/icon.iconset -o build/icon.icns
 
       - name: Build release artifacts
-        run: ${{ matrix.build_command }}
+        run: npm run electron:build:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
@@ -107,19 +145,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          IFS=',' read -ra patterns <<< "${{ matrix.asset_glob }}"
-          files=()
-          for pattern in "${patterns[@]}"; do
-            for file in $pattern; do
-              if [[ -f "$file" ]]; then
-                files+=("$file")
-              fi
-            done
-          done
-
-          if [[ ${#files[@]} -eq 0 ]]; then
-            echo "No release assets matched for ${{ matrix.platform }}."
-            exit 1
-          fi
-
-          gh release upload "${{ steps.release_tag.outputs.tag }}" "${files[@]}" --clobber
+          gh release upload "${{ steps.release_tag.outputs.tag }}" \
+            release/Job*macos*.dmg \
+            release/Job*macos*.zip \
+            --clobber
