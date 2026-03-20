@@ -51,6 +51,7 @@ coverage
 .cache
 .temp
 release-*
+!.github/workflows/release-build.yml
 electron/
 
 .failsafe/

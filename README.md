@@ -41,6 +41,8 @@ The design center is privacy and operational honesty. The application stores its
 
 `implemented`: The repository also includes backend smoke coverage and an Electron Playwright E2E suite scaffold.
 
+`implemented`: The repository is configured to build macOS release artifacts on macOS runners, with optional notarization when Apple signing credentials are present.
+
 `planned`: Broader cross-platform hardening and deeper browser-backed automation remain active roadmap topics in the planning documents.
 
 ## What The App Does
@@ -66,21 +68,25 @@ The design center is privacy and operational honesty. The application stores its
 | Desktop notifications and tray behavior | `implemented` | Notification toggles and minimize-to-tray behavior are part of the current UI and desktop runtime. |
 | Windows packaging | `implemented` | The build config emits NSIS and portable Windows artifacts. |
 | E2E automation suite | `implemented` | A Playwright Electron suite exists in the repo. |
-| Cross-platform distribution | `planned` | Windows packaging is configured now; wider distribution hardening is not yet documented as complete. |
+| Cross-platform distribution | `implemented` | Windows packaging is local; macOS packaging is configured for macOS runners and release uploads. |
 | Team sync, cloud backend, accounts | `deferred` | These are outside the current product scope. |
 
 ## Installation
 
 ### End Users
 
-Use the Windows release artifacts generated from the project packaging flow. The current packaging configuration produces Windows-only downloads:
+Use the release artifacts generated from the project packaging flow. The current packaging configuration produces:
 
 - An NSIS installer
 - A portable executable
+- A macOS DMG
+- A macOS ZIP
 
-There is no packaged macOS build in this repository today. If you are on macOS, do not download the `.exe` asset from Releases because it is a Windows binary and will not install correctly.
+If you are on macOS, download the macOS `.dmg` or `.zip` asset from Releases. Do not download the `.exe` asset because it is a Windows binary.
+If the macOS build is unsigned, use Finder's `Open` action on first launch so Gatekeeper can present the manual override flow.
 
 The artifact naming pattern is `Job Ranger-v<version>-windows-x64.<ext>`.
+The macOS artifact naming pattern is `Job Ranger-v<version>-macos-<arch>.<ext>`.
 
 ### Developers
 
@@ -106,7 +112,7 @@ For development:
 npm run electron:dev
 ```
 
-For a packaged Windows build, use the generated installer or portable executable. macOS packaging is still planned, not shipped.
+For a packaged Windows build, use the generated installer or portable executable. For macOS, use the `.dmg` or `.zip` artifact attached to the release.
 
 ### 2. Add A Source
 
@@ -226,20 +232,23 @@ Recommended local sequence:
 
 ## Packaging
 
-Windows packaging is configured through Electron Builder and currently targets:
+Packaging is configured through Electron Builder and currently targets:
 
 - `nsis`
 - `portable`
+- `dmg`
+- `zip`
 
 Packaging commands:
 
 ```bash
 npm run electron:build
 npm run electron:build:win
+npm run electron:build:mac
 npm run electron:pack
 ```
 
-The current builder configuration uses `public/ICON.png` for the Windows icon and names artifacts with an explicit `windows` platform marker to reduce download confusion on non-Windows devices.
+The current builder configuration uses `public/ICON.png` for Windows artifacts and generates a macOS `.icns` icon on macOS runners before building `dmg` and `zip` assets.
 
 ## Roadmap And Limits
 
@@ -274,9 +283,10 @@ The current builder configuration uses `public/ICON.png` for the Windows icon an
 | The app classifies source support levels rather than treating every source as fully supported. | `implemented` | `src/shared/contracts.ts:18`, `src/shared/contracts.ts:33` |
 | Backend smoke coverage exercises persistence, source detection, and concurrency protection. | `implemented` | `tests/backend-smoke-test.cjs:115` |
 | An Electron Playwright E2E suite exists for dashboard, navigation, companies, filters, settings, and notifications flows. | `implemented` | `tests/e2e/app.spec.ts:39` |
-| Windows packaging targets NSIS and portable artifacts. | `implemented` | `electron-builder.json:17` |
+| Windows packaging targets NSIS and portable artifacts. | `implemented` | `electron-builder.json:18` |
+| macOS packaging targets DMG and ZIP artifacts. | `implemented` | `electron-builder.json:35` |
 | Desktop notifications and system tray behavior are part of the documented system state. | `implemented` | `docs/SYSTEM_STATE.md:76` |
-| Cross-platform support is complete. | `unknown` | Current packaging config documents Windows targets only. |
+| Cross-platform support is complete. | `unknown` | Packaging exists for Windows and macOS, but runtime validation still depends on platform testing. |
 | Application tracking is part of the shipped product. | `planned` | `docs/planning/PLAN.md:282` |
 
 ## Help

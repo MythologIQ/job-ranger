@@ -7,7 +7,8 @@ This help file is written for people using or evaluating the desktop application
 ### Install Or Launch
 
 - If you are using a packaged Windows release, run the installer or portable executable.
-- If you are on macOS, do not download the `.exe` release asset. A packaged macOS build is not shipped yet.
+- If you are on macOS, download the `.dmg` or `.zip` release asset. Do not download the `.exe` Windows installer.
+- If macOS warns that the app is from an unidentified developer, use Finder's `Open` action once to allow the app to launch.
 - If you are running from source, start the desktop shell with `npm run electron:dev`.
 
 ### Add Your First Source
@@ -143,9 +144,9 @@ No. The current product is focused on discovery and review.
 
 `implemented`: the repository contains a desktop runtime that can be developed beyond Windows.
 
-`planned`: broad cross-platform hardening and distribution maturity.
+`implemented`: packaged macOS release artifacts can be built on macOS runners.
 
-`implemented`: Windows packaging is the documented release path today.
+`implemented`: Windows and macOS packaging paths are documented today.
 
 ### Is The E2E Suite Part Of The Repo?
 
@@ -162,6 +163,7 @@ npm run test
 npm run repo:health
 npm run electron:dev
 npm run electron:build:win
+npm run electron:build:mac
 ```
 
 ### Current Packaged Outputs
@@ -171,10 +173,16 @@ Windows packaging is configured for:
 - NSIS installer
 - portable executable
 
+macOS packaging is configured for:
+
+- DMG
+- ZIP
+
 Artifact names follow:
 
 ```text
 Job Ranger-v<version>-windows-x64.<ext>
+Job Ranger-v<version>-macos-<arch>.<ext>
 ```
 
 ## Status Snapshot
@@ -187,7 +195,8 @@ Job Ranger-v<version>-windows-x64.<ext>
 | Notifications settings | `implemented` |
 | Tray behavior | `implemented` |
 | Windows packaging | `implemented` |
-| Cross-platform distribution maturity | `planned` |
+| macOS packaging | `implemented` |
+| Cross-platform distribution maturity | `implemented` |
 | Cloud sync | `deferred` |
 | Auto-apply workflows | `deferred` |
 

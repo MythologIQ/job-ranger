@@ -1,0 +1,125 @@
+name: Build Release Assets
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to upload assets to, for example v1.0.2"
+        required: true
+        type: string
+      platform:
+        description: "Which release assets to build"
+        required: true
+        default: macos
+        type: choice
+        options:
+          - macos
+          - windows
+          - all
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == matrix.platform
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            build_command: npm run electron:build:win
+            asset_glob: release/Job*windows*.exe,release/Job*windows*.exe.blockmap,release/latest.yml
+          - os: macos-latest
+            platform: macos
+            build_command: npm run electron:build:mac
+            asset_glob: release/Job*macos*.dmg,release/Job*macos*.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate macOS icon
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/icon.iconset
+          sips -z 16 16 public/ICON.png --out build/icon.iconset/icon_16x16.png
+          sips -z 32 32 public/ICON.png --out build/icon.iconset/icon_16x16@2x.png
+          sips -z 32 32 public/ICON.png --out build/icon.iconset/icon_32x32.png
+          sips -z 64 64 public/ICON.png --out build/icon.iconset/icon_32x32@2x.png
+          sips -z 128 128 public/ICON.png --out build/icon.iconset/icon_128x128.png
+          sips -z 256 256 public/ICON.png --out build/icon.iconset/icon_128x128@2x.png
+          sips -z 256 256 public/ICON.png --out build/icon.iconset/icon_256x256.png
+          sips -z 512 512 public/ICON.png --out build/icon.iconset/icon_256x256@2x.png
+          sips -z 512 512 public/ICON.png --out build/icon.iconset/icon_512x512.png
+          cp public/ICON.png build/icon.iconset/icon_512x512@2x.png
+          iconutil -c icns build/icon.iconset -o build/icon.icns
+
+      - name: Build release artifacts
+        run: ${{ matrix.build_command }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+
+      - name: Resolve target tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure GitHub release exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "${{ steps.release_tag.outputs.tag }}" >/dev/null 2>&1; then
+            gh release create "${{ steps.release_tag.outputs.tag }}" \
+              --title "Job Ranger ${{ steps.release_tag.outputs.tag }}" \
+              --generate-notes
+          fi
+
+      - name: Upload release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IFS=',' read -ra patterns <<< "${{ matrix.asset_glob }}"
+          files=()
+          for pattern in "${patterns[@]}"; do
+            for file in $pattern; do
+              if [[ -f "$file" ]]; then
+                files+=("$file")
+              fi
+            done
+          done
+
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No release assets matched for ${{ matrix.platform }}."
+            exit 1
+          fi
+
+          gh release upload "${{ steps.release_tag.outputs.tag }}" "${files[@]}" --clobber

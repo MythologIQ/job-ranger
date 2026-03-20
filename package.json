@@ -24,6 +24,7 @@
     "electron:dev": "concurrently \"npm run dev\" \"npm run desktop:watch\" \"wait-on http://localhost:5173 electron/main.cjs && electron .\"",
     "electron:build": "npm run repo:health && electron-builder",
     "electron:build:win": "npm run repo:health && electron-builder --win",
+    "electron:build:mac": "npm run repo:health && electron-builder --mac",
     "electron:pack": "npm run repo:health && electron-builder --dir"
   },
   "dependencies": {
