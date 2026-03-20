@@ -1,6 +1,6 @@
 ﻿# Job Ranger
 
-[![Version](https://img.shields.io/badge/version-1.0.1-0f172a.svg)](#release-status)
+[![Version](https://img.shields.io/badge/version-1.0.2-0f172a.svg)](#release-status)
 [![Platform](https://img.shields.io/badge/platform-Windows%20desktop-2563eb.svg)](#installation)
 [![Electron](https://img.shields.io/badge/Electron-28.3.3-47848f.svg)](#technology)
 [![React](https://img.shields.io/badge/React-19.2.3-149eca.svg)](#technology)
@@ -37,7 +37,7 @@ The design center is privacy and operational honesty. The application stores its
 
 ## Release Status
 
-`implemented`: Job Ranger `v1.0.1` ships as a desktop application with a local Electron IPC backend, SQLite-backed persistence, company/job/filter/settings management, scrape run tracking, notifications settings, and Windows packaging.
+`implemented`: Job Ranger `v1.0.2` ships as a desktop application with a local Electron IPC backend, SQLite-backed persistence, company/job/filter/settings management, scrape run tracking, notifications settings, and Windows packaging.
 
 `implemented`: The repository also includes backend smoke coverage and an Electron Playwright E2E suite scaffold.
 
@@ -265,7 +265,7 @@ The current builder configuration uses `public/ICON.png` for the Windows icon an
 
 | Claim | Status | Source |
 |---|---|---|
-| Job Ranger is version `1.0.1`. | `implemented` | `package.json:4` |
+| Job Ranger is version `1.0.2`. | `implemented` | `package.json:4` |
 | The desktop app exposes company, job, filter, settings, and scrape-run operations over a preload API. | `implemented` | `src/shared/contracts.ts:283` |
 | The Electron shell creates a local window, enforces context isolation, and loads the renderer from `dist` in production. | `implemented` | `electron/src/main.cts:23` |
 | The application stores data in a local app data directory and initializes a desktop backend on startup. | `implemented` | `electron/src/main.cts:195` |
